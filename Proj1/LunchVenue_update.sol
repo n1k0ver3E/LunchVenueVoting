@@ -15,38 +15,38 @@ contract LunchVenue{
         uint venue;
     }
     
-    
     mapping (uint => string) public venues; 
     mapping(address => Friend) public friends;
-
     uint public numVenues = 0; 
     uint public numFriends = 0;
     uint public numVotes = 0;
     address public manager; 
     string public votedVenue = ""; //Where to have lunch
     
-    uint public voteStartTime;
-    uint public voteEndTime;
-    uint public temp;
-
-    
     mapping (uint => Vote) private votes;
     mapping (uint => uint) private results; 
-    bool voteOpen = false; //voting is open
+    bool voteOpen = true; //voting is open
 
     //Creates a new lunch venue contract
     constructor () {
         manager = msg.sender; //Set contract creator as manager 
     }
     
-
+    /// @notice Add a new lunch venue
+    /// @dev To simplify the code duplication of venues is not checked 
+    /// @param name Name of the venue
+    /// @return Number of lunch venues added so far
     function addVenue(string memory name) public restricted returns (uint){
         numVenues++; 
         venues[numVenues] = name;
         return numVenues; 
     }
     
-
+    /// @notice Add a new friend who can vote on lunch venue
+    /// @dev To simplify the code duplication of friends is not checked 
+    /// @param friendAddress Friend’s account address
+    /// @param name Friend’s name
+    /// @return Number of friends added so far
     function addFriend(address friendAddress, string memory name) public restricted returns (uint){
         Friend memory f; 
         f.name = name;
@@ -56,21 +56,10 @@ contract LunchVenue{
         return numFriends; 
     }
     
-    function createStartTime(uint time) public restricted returns (uint){
-        voteStartTime = time;
-        return voteStartTime;
-    }
-    
-    function createEndTime(uint time) public restricted returns (uint){
-        voteEndTime = time;
-        return voteEndTime;
-    }
-    
-    function getBlockNum() public returns (uint) {
-        temp = block.timestamp;
-        return temp;
-    }
-    
+    /// @notice Vote for a lunch venue
+    /// @dev To simplify the code multiple votes by a friend is not checked 
+    /// @param venue Venue number being voted
+    /// @return validVote Is the vote valid? A valid vote should be from a registered friend and to a registered venue
     function doVote(uint venue) public votingOpen returns (bool validVote){ 
         validVote = false; //Is the vote valid?
         if(friends[msg.sender].voted != true){
@@ -122,16 +111,6 @@ contract LunchVenue{
     }
     /// @notice Only whenb voting is still open
     modifier votingOpen() {
-        uint currentTime;
-        currentTime = block.timestamp;
-        
-        if (currentTime < voteEndTime && currentTime > voteStartTime){
-            voteOpen = true;
-        }
-        else{
-            voteOpen = false;
-        }
-        
         require(voteOpen == true, "Can vote only while voting is open."); 
         _;
     } 
