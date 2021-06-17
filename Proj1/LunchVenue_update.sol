@@ -4,7 +4,6 @@ pragma solidity ^0.8.0;
 
 /// @title Contract to agree on the lunch venue
 contract LunchVenue{
-    
     struct Friend { 
         string name;
         bool voted; 
@@ -26,28 +25,35 @@ contract LunchVenue{
     mapping (uint => Vote) private votes;
     mapping (uint => uint) private results; 
     bool voteOpen = true; //voting is open
+    
+    uint public startTime;
+    uint public endTime;
+    
+    uint public temp;
 
     //Creates a new lunch venue contract
     constructor () {
         manager = msg.sender; //Set contract creator as manager 
     }
     
-    /// @notice Add a new lunch venue
-    /// @dev To simplify the code duplication of venues is not checked 
-    /// @param name Name of the venue
-    /// @return Number of lunch venues added so far
+
     function addVenue(string memory name) public restricted returns (uint){
+        require(
+            block.timestamp <= startTime,
+            "Voting already begin."
+        );
+        
         numVenues++; 
         venues[numVenues] = name;
         return numVenues; 
     }
     
-    /// @notice Add a new friend who can vote on lunch venue
-    /// @dev To simplify the code duplication of friends is not checked 
-    /// @param friendAddress Friend’s account address
-    /// @param name Friend’s name
-    /// @return Number of friends added so far
     function addFriend(address friendAddress, string memory name) public restricted returns (uint){
+        require(
+            block.timestamp <= startTime,
+            "Voting already begin."
+        );
+        
         Friend memory f; 
         f.name = name;
         f.voted = false;
@@ -56,24 +62,36 @@ contract LunchVenue{
         return numFriends; 
     }
     
-    /// @notice Vote for a lunch venue
-    /// @dev To simplify the code multiple votes by a friend is not checked 
-    /// @param venue Venue number being voted
-    /// @return validVote Is the vote valid? A valid vote should be from a registered friend and to a registered venue
+    function addStartTime(uint time) public restricted returns (uint){
+        startTime = time;
+        return startTime;
+    }
+    
+    function addEndTime(uint time) public restricted returns (uint256){
+        endTime = time;
+        return endTime;
+    }
+    
+    function printBlockNumber() public restricted returns (uint256){
+        temp = block.number;
+        return temp;
+    }
+    
+
     function doVote(uint venue) public votingOpen returns (bool validVote){ 
         validVote = false; //Is the vote valid?
-        if(friends[msg.sender].voted != true){
-            if (bytes(friends[msg.sender].name).length != 0) { //Does friend exist? 
-                if (bytes(venues[venue]).length != 0) { //Does venue exist?
-                    validVote = true;
-                    friends[msg.sender].voted = true; 
-                    Vote memory v;
-                    v.voterAddress = msg.sender; 
-                    v.venue = venue;
+        if (bytes(friends[msg.sender].name).length != 0) { //Does friend exist? 
+            if (bytes(venues[venue]).length != 0) { //Does venue exist?
+                validVote = true;
+                Vote memory v;
+                v.voterAddress = msg.sender; 
+                v.venue = venue;
+                if (friends[msg.sender].voted == false){
                     numVotes++; 
-                    votes[numVotes] = v;
-                } 
-            }
+                }
+                friends[msg.sender].voted = true; 
+                votes[numVotes] = v;
+            } 
         }
         
         if (numVotes >= numFriends/2 + 1) { //Quorum is met
@@ -104,15 +122,24 @@ contract LunchVenue{
         voteOpen = false; //Voting is now closed
     }
     
+    /// only manager can kill the contract
+    function kill() public restricted{
+        selfdestruct(payable(msg.sender));
+    }
+        
+    
     /// @notice Only manager can do
     modifier restricted() {
         require (msg.sender == manager, "Can only be executed by the manager"); 
         _;
     }
+    
     /// @notice Only whenb voting is still open
     modifier votingOpen() {
         require(voteOpen == true, "Can vote only while voting is open."); 
         _;
     } 
+    
+    
     
 }
