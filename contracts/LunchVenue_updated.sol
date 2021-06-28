@@ -26,10 +26,10 @@ contract LunchVenue{
     mapping (uint => uint) private results; 
     bool voteOpen = true; //voting is open
     
-    uint public startTime;
-    uint public endTime;
+    // addVenue and addFriend should be done before voting start
+    uint public votingStartBlock;
+    uint public votingEndBlock;
     
-    uint public temp;
 
     //Creates a new lunch venue contract
     constructor () {
@@ -37,23 +37,13 @@ contract LunchVenue{
     }
     
 
-    function addVenue(string memory name) public restricted returns (uint){
-        require(
-            block.timestamp <= startTime,
-            "Voting already begin."
-        );
-        
+    function addVenue(string memory name) public  addingOpen restricted returns (uint){
         numVenues++; 
         venues[numVenues] = name;
         return numVenues; 
     }
     
-    function addFriend(address friendAddress, string memory name) public restricted returns (uint){
-        require(
-            block.timestamp <= startTime,
-            "Voting already begin."
-        );
-        
+    function addFriend(address friendAddress, string memory name) public addingOpen restricted  returns (uint){
         Friend memory f; 
         f.name = name;
         f.voted = false;
@@ -62,19 +52,29 @@ contract LunchVenue{
         return numFriends; 
     }
     
-    function addStartTime(uint time) public restricted returns (uint){
-        startTime = time;
-        return startTime;
+    /// setting StartBlock, add friend and add venue must be finished before StartBlock. (for q2)
+    /// before StartBlock it's the preparing phrase; 
+    /// During the StartBlock and EndBlock, it's the voting phrase; after EndBlock is the finishing phrase
+    function addStartBlock(uint blockNum) public restricted returns (uint){
+        votingStartBlock = blockNum;
+        return votingStartBlock;
     }
     
-    function addEndTime(uint time) public restricted returns (uint256){
-        endTime = time;
-        return endTime;
+    /// setting Ending Block, votingEndBlock = StartBlock + param, (for q3)
+    function addEndBlock(uint blockNum) public restricted returns (uint256){
+        uint expireOf = blockNum;
+        votingEndBlock = votingStartBlock + expireOf;
+        return votingEndBlock;
     }
     
-    function printBlockNumber() public restricted returns (uint256){
-        temp = block.number;
-        return temp;
+    /// Setting printCurrentBlock to callback the latest blocknumber, 
+    /// And to verify whether the block number is beyond the timeout(votingEndBlock), for q3
+    function printCurrentBlock() public restricted returns (uint){
+        uint currentBlock = block.number;
+        if (currentBlock >= votingEndBlock){
+            finalResult();
+        }
+        return currentBlock;
     }
     
 
@@ -86,10 +86,10 @@ contract LunchVenue{
                 Vote memory v;
                 v.voterAddress = msg.sender; 
                 v.venue = venue;
-                if (friends[msg.sender].voted == false){
+                if (friends[msg.sender].voted == false){   //only if the friend never vote, the numvotes could be added. (for q1)
                     numVotes++; 
                 }
-                friends[msg.sender].voted = true; 
+                friends[msg.sender].voted = true;  // if  the friend.voted=true, the numvotes could not be added. (for q1)
                 votes[numVotes] = v;
             } 
         }
@@ -122,9 +122,11 @@ contract LunchVenue{
         voteOpen = false; //Voting is now closed
     }
     
-    /// only manager can kill the contract
-    function kill() public restricted{
+    /// only manager can kill the contract, for q4
+    function kill() public restricted returns (bool killRes){
         selfdestruct(payable(msg.sender));
+        killRes = true;
+        return killRes;
     }
         
     
@@ -139,6 +141,19 @@ contract LunchVenue{
         require(voteOpen == true, "Can vote only while voting is open."); 
         _;
     } 
+    
+    modifier addingOpen() {
+        require(
+            votingStartBlock > 0 && votingEndBlock > 0,
+            "Setting StartBlock and EndBlock firstly."
+            );
+            
+        require(
+            block.number <= votingStartBlock,
+            "Execution Error."
+        );
+        _;
+    }
     
     
     
