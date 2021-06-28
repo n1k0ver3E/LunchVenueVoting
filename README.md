@@ -2,7 +2,7 @@
 
 ## 0x00 Introduction
 
-This is my first solidity project, LunchVenue Voting. The spec can be found at [here](https://github.com/PYF0311/LunchVenueVoting/blob/main/COMP_6452_Project_1%202021.pdf).
+This is my first smart chain project, LunchVenue Voting. You can clone it and deploy it on Ropsten test Network. The spec can be found at [here](https://github.com/PYF0311/LunchVenueVoting/blob/main/COMP_6452_Project_1%202021.pdf).
 
 **Solidity Version**: ``^0.8.0``
 
