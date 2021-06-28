@@ -48,7 +48,7 @@ git clone git@github.com:PYF0311/LunchVenueVoting.git
   remixd -s <absolute_folder_path> --remix-ide "<remix-ide-instance-URL>"
   ```
 
-### 3. More detail can be found at spec
+### 3. More deploy and test detail can be found at spec
 
 
 
