@@ -42,7 +42,7 @@ git clone git@github.com:PYF0311/LunchVenueVoting.git
 
 - Click `Connect to Localhost`
 
-- Move to cloned folder, type
+- Move to cloned folder, input
 
   ```
   remixd -s <absolute_folder_path> --remix-ide "<remix-ide-instance-URL>"
