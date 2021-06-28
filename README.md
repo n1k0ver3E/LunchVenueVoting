@@ -1,6 +1,6 @@
 # LunchVenueVoting
 
-### 0x00 Introduction
+## 0x00 Introduction
 
 This is my first solidity project, LunchVenue Voting. The spec can be found at [dfsd](www.baidu.com).
 
@@ -23,22 +23,22 @@ In `contracts` folder, ``LunchVenue.sol`` is to implement the basic function. ``
 
 In `tests` folder, `LunchVenue_test.sol`  is used to test `LunchVenue.sol`，`LunchVenue_updated_test.sol` is used to test `LunchVenue_updated.sol`.
 
-### 0x01 Function Implementation
+## 0x01 Function Implementation
 
 - Usage of Structure
 - Add user / lunch venue
 - When an accident occurs, the destruction contract
 - Voting Timeout using block number
 
-### 0x02 Deploy and test
+## 0x02 Deploy and test
 
-#### 1. git clone it
+### 1. git clone it
 
 ```
 git clone git@github.com:PYF0311/LunchVenueVoting.git
 ```
 
-#### 2. Open in Remix
+### 2. Open in Remix
 
 - Click `Connect to Localhost`
 
@@ -48,7 +48,7 @@ git clone git@github.com:PYF0311/LunchVenueVoting.git
   remixd -s <absolute_folder_path> --remix-ide "<remix-ide-instance-URL>"
   ```
 
-#### 3. More detail can be found at spec
+### 3. More detail can be found at spec
 
 
 
